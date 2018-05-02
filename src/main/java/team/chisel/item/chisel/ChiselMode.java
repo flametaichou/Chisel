@@ -5,6 +5,10 @@ import com.cricketcraft.chisel.api.Statistics;
 import com.cricketcraft.chisel.api.carving.ICarvingVariation;
 import com.cricketcraft.chisel.api.carving.IChiselMode;
 
+import net.minecraft.init.Blocks;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.world.BlockEvent;
 import team.chisel.network.PacketHandler;
 import team.chisel.network.message.MessageChiselSound;
 import net.minecraft.block.Block;
@@ -21,7 +25,13 @@ public enum ChiselMode implements IChiselMode {
 
 		@Override
 		public void chiselAll(EntityPlayer player, World world, int x, int y, int z, ForgeDirection side, ICarvingVariation variation) {
-			setVariation(player, world, x, y, z, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), variation);
+            BlockSnapshot blockSnapshot = new BlockSnapshot(world, x, y, z, Blocks.dirt, 0);
+            BlockEvent.PlaceEvent event = ForgeEventFactory.onPlayerBlockPlace(player, blockSnapshot, side);
+            if (!event.isCanceled())
+            {
+                event.setCanceled(true);
+                setVariation(player, world, x, y, z, world.getBlock(x, y, z), world.getBlockMetadata(x, y, z), variation);
+            }
 		}
 	},
 	PANEL {
